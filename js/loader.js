@@ -58,7 +58,9 @@
              * 4、class 不为空。
              */
             var img = images[i];
-            
+            if(!img) {
+                continue;
+            }
             if(img.width && img.height && checkImageSize(img.width, img.height, params)) {
                 //将图片的宽高写在页面中，而不是css中，说明该图片尺寸不固定，因此是主要图片。
                 rsImages.push(img);
