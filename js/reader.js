@@ -1,4 +1,4 @@
-YUI().use('node', 'yql', 'loader-images', function(Y) {
+ï»¿YUI().use('node', 'yql', 'loader-images', function(Y) {
     
     var params;
     
@@ -33,13 +33,13 @@ YUI().use('node', 'yql', 'loader-images', function(Y) {
         }
         if(finishLoad && waitForShowImagesCount <= 0) {
             Y.detach("scroll", checkTouchButton);
-            bottomState.insert("ÒÑÍê³É£¬Ã»ÓÐ¸ü¶àµÄÍ¼Æ¬ÁË¡£", "replace");
+            bottomState.insert("å·²å®Œæˆï¼Œæ²¡æœ‰æ›´å¤šçš„å›¾ç‰‡äº†ã€‚", "replace");
             banTouchEvent = true;
         }
     };
     
     var loadNothing = function() {
-        bottomState.insert("Ò»ÕÅÍ¼Æ¬Ò³Ã»ÓÐÕÒµ½£¡", "replace");
+        bottomState.insert("ä¸€å¼ å›¾ç‰‡é¡µæ²¡æœ‰æ‰¾åˆ°ï¼", "replace");
     };
     
     var checkTouchButton = function() {
@@ -115,7 +115,7 @@ YUI().use('node', 'yql', 'loader-images', function(Y) {
                 touchButton();
             };
         } else if(state=="error") {
-            alert("½âÎöÍøÖ·Ê±·¢ÉúÁË´íÎó£º"+msg);
+            alert("è§£æžç½‘å€æ—¶å‘ç”Ÿäº†é”™è¯¯ï¼š"+msg);
         }
     };
     
@@ -128,13 +128,13 @@ YUI().use('node', 'yql', 'loader-images', function(Y) {
         var url = urltext.get("value");
         
         if(!url.match(PageUrlRex)) {
-            alert("ÇëÊäÈëÕýÈ·µÄÍøÖ·£¡");
+            alert("è¯·è¾“å…¥æ­£ç¡®çš„ç½‘å€ï¼");
             return;
         }
         submitIndex.set("disabled", true);
         submitImage.set("disabled", true);
         urltext.set("disabled", true);
-        msgBox.insert("ÕýÔÚ½âÎöÍøÖ·£¬ÇëÉÔºó...", "replace");
+        msgBox.insert("æ­£åœ¨è§£æžç½‘å€ï¼Œè¯·ç¨åŽ...", "replace");
         
         params = {
             url : url,

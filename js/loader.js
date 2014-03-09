@@ -1,4 +1,4 @@
-YUI.add("loader-images", function(Y){
+ï»¿YUI.add("loader-images", function(Y){
     
     var hasAnotherPage = true;
     var allImagesCount = 0;
@@ -48,19 +48,19 @@ YUI.add("loader-images", function(Y){
         var rsImages = [];
         var candidates = [];
         for(var i=0; i<images.length; ++i) {
-            /* Í¼Æ¬±êÖ¾ÐÔÌØÕ÷·ÖÎö£ºÈç¹ûÆ¥ÅäÁË£¬»ù±¾100%¾ÍÊÇÒªÕÒµÄÄ¿±êÁË¡£
-             * ÌØÕ÷ÓÐ£¨°´ÕÕÖØÒªË³ÐòÅÅÁÐ£©
-             * 1¡¢Ö±½ÓÔÚ img ÖÐÐ´ width, height Öµ£¬ÕâËµÃ÷Éè¼ÆÕß²»ÖªµÀÍ¼Æ¬µÄ³ß´ç£¬ÓÃ³ÌÐòÖ±½ÓÉú³É¡£
-             * 2¡¢Ð´ÔÚstyleÀï£¬ÀíÓÉÍ¬ÉÏ¡£
-             * ×¢£ºÒÔÉÏÁ½ÖÖÇé¿ö¿ÉÒÔÍ¨¹ý³ß´ç¹ýÂËÌõÌ«Ð¡µÄÍ¼Æ¬¡£
+            /* å›¾ç‰‡æ ‡å¿—æ€§ç‰¹å¾åˆ†æžï¼šå¦‚æžœåŒ¹é…äº†ï¼ŒåŸºæœ¬100%å°±æ˜¯è¦æ‰¾çš„ç›®æ ‡äº†ã€‚
+             * ç‰¹å¾æœ‰ï¼ˆæŒ‰ç…§é‡è¦é¡ºåºæŽ’åˆ—ï¼‰
+             * 1ã€ç›´æŽ¥åœ¨ img ä¸­å†™ width, height å€¼ï¼Œè¿™è¯´æ˜Žè®¾è®¡è€…ä¸çŸ¥é“å›¾ç‰‡çš„å°ºå¯¸ï¼Œç”¨ç¨‹åºç›´æŽ¥ç”Ÿæˆã€‚
+             * 2ã€å†™åœ¨styleé‡Œï¼Œç†ç”±åŒä¸Šã€‚
+             * æ³¨ï¼šä»¥ä¸Šä¸¤ç§æƒ…å†µå¯ä»¥é€šè¿‡å°ºå¯¸è¿‡æ»¤æ¡å¤ªå°çš„å›¾ç‰‡ã€‚
              * 
-             * 3¡¢id ²»Îª¿Õ£¬ÓÐÄÚÈÝ¡££¨¿ÉÒÔ¶ÔÄÚÈÝ½øÐÐÓï·¨·ÖÎö£¬ÀýÈçÓÐmainµÈ×ÖÑù£©
-             * 4¡¢class ²»Îª¿Õ¡£
+             * 3ã€id ä¸ä¸ºç©ºï¼Œæœ‰å†…å®¹ã€‚ï¼ˆå¯ä»¥å¯¹å†…å®¹è¿›è¡Œè¯­æ³•åˆ†æžï¼Œä¾‹å¦‚æœ‰mainç­‰å­—æ ·ï¼‰
+             * 4ã€class ä¸ä¸ºç©ºã€‚
              */
             var img = images[i];
             
             if(img.width && img.height && checkImageSize(img.width, img.height, params)) {
-                //½«Í¼Æ¬µÄ¿í¸ßÐ´ÔÚÒ³ÃæÖÐ£¬¶ø²»ÊÇcssÖÐ£¬ËµÃ÷¸ÃÍ¼Æ¬³ß´ç²»¹Ì¶¨£¬Òò´ËÊÇÖ÷ÒªÍ¼Æ¬¡£
+                //å°†å›¾ç‰‡çš„å®½é«˜å†™åœ¨é¡µé¢ä¸­ï¼Œè€Œä¸æ˜¯cssä¸­ï¼Œè¯´æ˜Žè¯¥å›¾ç‰‡å°ºå¯¸ä¸å›ºå®šï¼Œå› æ­¤æ˜¯ä¸»è¦å›¾ç‰‡ã€‚
                 rsImages.push(img);
                 continue;
             }
@@ -78,7 +78,7 @@ YUI.add("loader-images", function(Y){
             }
             candidates.push(img);
         }
-        //ºòÑ¡Í¼Æ¬Ö»ÓÐÔÚÖ®Ç°Ò»ÕÅÍ¼Æ¬¶¼ÕÒ²»µ½µÄÊ±ºòÆôÓÃ¡£
+        //å€™é€‰å›¾ç‰‡åªæœ‰åœ¨ä¹‹å‰ä¸€å¼ å›¾ç‰‡éƒ½æ‰¾ä¸åˆ°çš„æ—¶å€™å¯ç”¨ã€‚
         if(candidates.length > 0 && rsImages.length <= 0) {
             rsImages.push(candidates[0]);
         }
@@ -183,14 +183,14 @@ YUI.add("loader-images", function(Y){
             if(NextPageNames[i]==con ||NextPageNames[i]==alt) {
                 container.content = con;
                 container.nextUrl = a.href;
-                return; //±ê×¼ÃûÒ»µ©Æ¥ÅäÁË£¬¼´È·¶¨ÁË¡£
+                return; //æ ‡å‡†åä¸€æ—¦åŒ¹é…äº†ï¼Œå³ç¡®å®šäº†ã€‚
             }
         }
         for(i=0; i<NextPageSigns.length; ++i) {
-            /* NextPageSigns ´æ´¢µÄÊÇ·ûºÅÃû£¬¶¼³¤µÃºÜÏñ¡°ÏÂÒ»Ò³¡±µÄ±êÖ¾¡£
-             * µ«ÊÇ£¬ÕâÐ©·ûºÅ¿ÉÄÜÒ²ÊÇ¡°×îºóÒ»Ò³¡°µÄ±êÖ¾¡£
-             * NextPageSigns Êý×éÖÐ¿¼Ç°µÄÔªËØ£¬±È¿¿ºóµÄÔªËØ¸üÏñ¡°ÏÂÒ»Ò³¡±µÄ±êÖ¾¡£
-             * Òò´Ë£¬Èç¹ûÍ¬Ò»Ò³ÃæÖÐÓÐÁ½¸öaºÍNextPageSignsÖÐµÄÔªËØÆ¥Åä£¬Ó¦¸ÃÑ¡Ôñ¿¿Ç°µÄÔªËØ¡£
+            /* NextPageSigns å­˜å‚¨çš„æ˜¯ç¬¦å·åï¼Œéƒ½é•¿å¾—å¾ˆåƒâ€œä¸‹ä¸€é¡µâ€çš„æ ‡å¿—ã€‚
+             * ä½†æ˜¯ï¼Œè¿™äº›ç¬¦å·å¯èƒ½ä¹Ÿæ˜¯â€œæœ€åŽä¸€é¡µâ€œçš„æ ‡å¿—ã€‚
+             * NextPageSigns æ•°ç»„ä¸­è€ƒå‰çš„å…ƒç´ ï¼Œæ¯”é åŽçš„å…ƒç´ æ›´åƒâ€œä¸‹ä¸€é¡µâ€çš„æ ‡å¿—ã€‚
+             * å› æ­¤ï¼Œå¦‚æžœåŒä¸€é¡µé¢ä¸­æœ‰ä¸¤ä¸ªaå’ŒNextPageSignsä¸­çš„å…ƒç´ åŒ¹é…ï¼Œåº”è¯¥é€‰æ‹©é å‰çš„å…ƒç´ ã€‚
              */
             if(NextPageSigns[i]==container.content) {
                 return;
@@ -202,14 +202,14 @@ YUI.add("loader-images", function(Y){
             }
         }
         if(!container.content && con==(""+(currPageIndex+1))) {
-            //Èç¹ûÊµÔÚÃ»ÓÐÕÒµ½µÄ»°£¬¾Í°Ñµ±Ç°Ò³µÄÏÂÒ»Ò³µÄÊý×Ö½øÐÐ²âÊÔ£¬Ò²Ðí¾ÍÃÉÖÐÁË¡£
-            //ÕâÊÇ²»Òª¸Ãcontainer.con£¬ÒòÎªÆäËûÅÐ¶¨µÄÓÅÏÈ¼¶Ó¦¸Ã¸ßÓÚÕâ¸ö¡£
+            //å¦‚æžœå®žåœ¨æ²¡æœ‰æ‰¾åˆ°çš„è¯ï¼Œå°±æŠŠå½“å‰é¡µçš„ä¸‹ä¸€é¡µçš„æ•°å­—è¿›è¡Œæµ‹è¯•ï¼Œä¹Ÿè®¸å°±è’™ä¸­äº†ã€‚
+            //è¿™æ˜¯ä¸è¦è¯¥container.conï¼Œå› ä¸ºå…¶ä»–åˆ¤å®šçš„ä¼˜å…ˆçº§åº”è¯¥é«˜äºŽè¿™ä¸ªã€‚
             container.nextUrl = a.href;
             return;
         }
     };
     
-    //´¦ÀíÍ¼Æ¬Ë÷ÒýÒ³
+    //å¤„ç†å›¾ç‰‡ç´¢å¼•é¡µ
     var onHandleImagesIndex = function(obj, domain, params, startIndex, pageIndex) {
         var limitCount = params.limitCount;
         var res = obj.query.results["a"];
@@ -220,7 +220,7 @@ YUI.add("loader-images", function(Y){
             var a = res[i];
             var url = handleHref(a.href, domain);
             if((a.img || !params.strictModel) && !url.match(ImageTypes)) {
-                 //ÊÓÎª¿ÉÒÔµã½øÈ¥µÄÍ¼Æ¬
+                 //è§†ä¸ºå¯ä»¥ç‚¹è¿›åŽ»çš„å›¾ç‰‡
                 handleImagePage(startIndex + count, url, domain, params);
                 limitCount--;
                 count++;

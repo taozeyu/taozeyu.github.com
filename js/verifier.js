@@ -1,24 +1,24 @@
-/* Verifier ÑéÖ¤Æ÷£º
+ï»¿/* Verifier éªŒè¯å™¨ï¼š
  * 
- * ÒıÓÃ£¬Ê¹ÓÃYUI.use("verifier" function(){...});
- * ±¾¿âÖ»ÓĞÒ»¸ö·½·¨ Y.Verifier(...);
+ * å¼•ç”¨ï¼Œä½¿ç”¨YUI.use("verifier" function(){...});
+ * æœ¬åº“åªæœ‰ä¸€ä¸ªæ–¹æ³• Y.Verifier(...);
  *
- * µ±×÷Îªµ¥ÖµÑéÖ¤Ê±£º
- * var verifier = Y.Verifier().above(5).under(10) ½¨Á¢Ò»¸ö 5 < x < 10 µÄÑéÖ¤Æ÷¡£
+ * å½“ä½œä¸ºå•å€¼éªŒè¯æ—¶ï¼š
+ * var verifier = Y.Verifier().above(5).under(10) å»ºç«‹ä¸€ä¸ª 5 < x < 10 çš„éªŒè¯å™¨ã€‚
  * verifier(7) => true, verifer(11) => false
  * verifier.assert(7) => pass, verifer.assert(11) throw error
  * 
- * Ê¹ÓÃorÁ¬½Ó£º
- * Y.Verifier().equal(3).or().equal(6).or().equal(9) ¶ÔÓÚ3¡¢6¡¢9 ¶¼¿ÉÒÔÍ¨¹ıÑéÖ¤¡£
+ * ä½¿ç”¨orè¿æ¥ï¼š
+ * Y.Verifier().equal(3).or().equal(6).or().equal(9) å¯¹äº3ã€6ã€9 éƒ½å¯ä»¥é€šè¿‡éªŒè¯ã€‚
  *
- * Ê¹ÓÃnotĞŞÊÎ£º
- * Y.Verifier().not().equal("good") Ö»Òª²»ÊÇ"good"¶¼¿ÉÒÔÍ¨¹ıÑéÖ¤¡£
+ * ä½¿ç”¨notä¿®é¥°ï¼š
+ * Y.Verifier().not().equal("good") åªè¦ä¸æ˜¯"good"éƒ½å¯ä»¥é€šè¿‡éªŒè¯ã€‚
  * 
- * Ê¹ÓÃotherwiseĞŞÊÎ£º
+ * ä½¿ç”¨otherwiseä¿®é¥°ï¼š
  * var verifier = Y.Verifier().under(12).otherwise("password is too long");
  * verifier.assert("woaibeijingtiananmen".length); => throw "password is too long"
  *
- * ×÷Îª²ÎÊıÑéÖ¤Æ÷£º
+ * ä½œä¸ºå‚æ•°éªŒè¯å™¨ï¼š
  * var verifier = Y.Verifier({
  *      age : Y.Verifier().between(15, 18),
  *      name : Y.Verifier().not().blank().otherwise("name can't be blank!"),
@@ -32,13 +32,13 @@
  *      name : "",
  * }); => throw "name can't be blank!"
  *
- * ÁĞ±í£º
+ * åˆ—è¡¨ï¼š
  * equal ==
  * above >
  * under <
  * between a1-a2
- * lengthBetween str.length ÊôÓÚ a1-a2
- * blank null »ò ¿Õ×Ö·û´®£¨°üÀ¨ÓÃ´¿´âÓÃ¿ÕÌî³äµÄ×Ö·û´®£©
+ * lengthBetween str.length å±äº a1-a2
+ * blank null æˆ– ç©ºå­—ç¬¦ä¸²ï¼ˆåŒ…æ‹¬ç”¨çº¯ç²¹ç”¨ç©ºå¡«å……çš„å­—ç¬¦ä¸²ï¼‰
  */
 YUI.add("verifier", function(Y){
     

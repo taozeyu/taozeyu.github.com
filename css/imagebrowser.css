@@ -1,0 +1,50 @@
+﻿#control-box {
+	padding-top: 55px;
+	padding-left: 55px;
+	text-align: center;
+}
+#control-box input {
+	font-size: 17px;
+	width: 30px;
+	height: 50px;
+}
+#control-box input[type="text"] {
+	width: 800px;
+}
+#control-box input[type="submit"] {
+	width: 200px;
+	font-size: 25px;
+	font-weight: bold;
+	margin-right: 35px;
+	margin-left: 35px;
+}
+#button-box {
+	padding-top: 30px;
+}
+#bottom-state {
+	padding-top: 15px;
+	padding-bottom: 15px;
+	font-size: 21px;
+	font-weight: bold;
+	text-align: center;
+}
+#loaded-images {
+	padding-top: 45px;
+}
+#loaded-images li {
+	text-align: center;
+	list-style-type: none;
+}
+
+#loaded-images object {
+	-moz-box-shadow:1px 1px 3px #333333, 0px 0px 1px #333333; -webkit-box-shadow:1px 1px 3px #333333, 0px 0px 1px #333333;
+	box-shadow:1px 1px 3px #333333, 0px 0px 1px #333333;
+	margin-top: 15px;
+	margin-bottom: 15px;
+}
+#msg-box {
+	font-size: 18px;
+	color: #333333;
+	text-align: center;
+	padding-top: 15px;
+}

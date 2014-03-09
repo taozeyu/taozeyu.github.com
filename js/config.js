@@ -1,7 +1,7 @@
-var PageUrlRex = /^(http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?$/;
+ï»¿var PageUrlRex = /^(http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?$/;
 var DomainHeadRex = /^(http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)/;
 
-var NextPageNames = ["next", "nextpage","next-page", "next_page", "ÏÂÒ»Ò³", "ÏÂÒ³", "·­Ò³", "´Î¤Î¥Ú©`¥¸", "´Î¥Ú©`¥¸", "´Î"];
+var NextPageNames = ["next", "nextpage","next-page", "next_page", "ä¸‹ä¸€é¡µ", "ä¸‹é¡µ", "ç¿»é¡µ", "æ¬¡ã®ãƒšãƒ¼ã‚¸", "æ¬¡ãƒšãƒ¼ã‚¸", "æ¬¡"];
 var NextPageSigns = ["..", "...", ">","\u8250", ">>", ">|", ">||", ">>|", ">>||"];
 
 var ImageTypes = /\.(jpg|jpeg|png|gif|tga|exif|pcx|tiff|fpx|svg|psd)/i;
