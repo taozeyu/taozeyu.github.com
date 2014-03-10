@@ -106,15 +106,7 @@
     
     var onState = function(state, msg) {
         
-        if(state=="finish") {
-            Y.log("search finished.");
-            finishLoad = true;
-            if(!loadAtLessOneImage) {
-                loadNothing();
-            } else {
-                touchButton();
-            };
-        } else if(state=="error") {
+        if(state=="error") {
             alert("解析网址时发生了错误："+msg);
         }
     };
@@ -141,15 +133,32 @@
             limitCount : 50,
             oncePerLoad : 5, //TODO delete
             type : type,
-            startPage : 1,
+            startPage : "guess",
             strictModel : true,
             minWidth : 55,
             minHeight : 55,
         };
-        params.sychroBuffer = Y.SychroBuffer.create(params.limitCount);
+        params.synchroBuffer = Y.SynchroBuffer.create(params.limitCount);
         params.onState = onState;
         
         Y.LoaderImages.start(params);
+        gallery.show();
+        
+        var testFun = function(state, img) {
+            if(state != Y.SynchroBuffer.Success) {
+                return;
+            }
+            img.width = 50;
+            img.height = 50;
+            
+            var widthAttr = img.width ? ("width='"+img.width+"'") : "";
+            var heightAttr = img.height ? ("height='"+img.height+"'") : "";
+            var html = "<li><object data='"+fillRandom(img.src)+"' frameBorder=0 scrolling=no "+widthAttr+" "+heightAttr+"></object></li>";
+            gallery.appendChild(html);
+            
+            params.synchroBuffer.get(testFun);
+        };
+        params.synchroBuffer.get(testFun);
     };
     
     Y.one("#btn-submit-index").on('click', function(){clickSumbit("index")});

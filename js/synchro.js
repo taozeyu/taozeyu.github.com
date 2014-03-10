@@ -57,7 +57,7 @@ YUI.add("synchro-buffer", function(Y){
                     callBack(Success, obj);
                 } catch (err) {
                     //异常抛出可能导致整个生产链停滞，必须吃掉异常。
-                    Y.log.error(err);
+                    Y.log(err, "error");
                 }
                 return true;
             }
@@ -71,7 +71,7 @@ YUI.add("synchro-buffer", function(Y){
                     callBack();
                 } catch (err) {
                     //异常抛出可能导致整个生产链停滞，必须吃掉异常。
-                    Y.log.error(err);
+                    Y.log(err, "error");
                 }
                 return true;
             }
@@ -85,7 +85,7 @@ YUI.add("synchro-buffer", function(Y){
                     callBack(Finished);
                 } catch (err) {
                     //异常抛出可能导致整个生产链停滞，必须吃掉异常。
-                    Y.log.error(err);
+                    Y.log(err, "error");
                 }
             }
         };
@@ -105,7 +105,7 @@ YUI.add("synchro-buffer", function(Y){
             while(keepLoop) {
                 keepLoop = false;
                 try {
-                    if(finish && producerQueue.length <= 0) {
+                    if(finish && queue.length <= 0) {
                         //生产者已经宣布停产，而缓存空了，此时应该回调所有正在等待的消费者，告诉他们finished！
                         clearConsumerQueue();
                         break;
@@ -128,7 +128,13 @@ YUI.add("synchro-buffer", function(Y){
                 throw "finished"
             }
             if(obj) {
-                queue.push(obj);
+                if(obj.constructor==Array) {
+                    for(var i=0; i<obj.length; ++i) {
+                        queue.push(obj[i]);
+                    }
+                }else {
+                    queue.push(obj);
+                }
             }
             if(continueFun) {
                 producerQueue.push(continueFun);

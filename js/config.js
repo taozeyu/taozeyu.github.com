@@ -5,6 +5,7 @@ var NextPageNames = ["next", "nextpage","next-page", "next_page", "下一页", "
 var NextPageSigns = ["..", "...", ">","\u8250", ">>", ">|", ">||", ">>|", ">>||"];
 
 var ImageTypes = /\.(jpg|jpeg|png|gif|tga|exif|pcx|tiff|fpx|svg|psd)/i;
+var UrlPageName = /page|p|pg|/i; //URL中可能用来描述page的表述
 
 var ImageLoadFailed = {
     url : "css/error.jpg",
