@@ -1,4 +1,4 @@
-﻿YUI().use('node', 'yql', 'loader-images', function(Y) {
+﻿YUI().use('node', 'yql', 'loader-images', 'synchro-buffer', function(Y) {
     
     var params;
     
@@ -139,15 +139,16 @@
         params = {
             url : url,
             limitCount : 50,
-            oncePerLoad : 5,
-            onLoadImage : onLoadImage,
-            onState : onState,
+            oncePerLoad : 5, //TODO delete
             type : type,
             startPage : 1,
             strictModel : true,
             minWidth : 55,
             minHeight : 55,
         };
+        params.sychroBuffer = Y.SychroBuffer.create(params.limitCount);
+        params.onState = onState;
+        
         Y.LoaderImages.start(params);
     };
     

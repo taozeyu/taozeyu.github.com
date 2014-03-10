@@ -11,3 +11,4 @@ var ImageLoadFailed = {
     width : 220,
     height : 220,
 };
+    

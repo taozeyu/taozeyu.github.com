@@ -1,7 +1,9 @@
 ﻿YUI.add("loader-images", function(Y){
     
-    var hasAnotherPage = true;
-    var allImagesCount = 0;
+    var hasAnotherPage = true; //TODO delete
+    
+    var imagesGroupNeedLoadCount = 0;
+    var noMorePage = false;
     
     var queryYQL = function (yql, callBackGroup, params) {
         var afterQuery = function(obj) {
@@ -26,6 +28,18 @@
             }
         };
         Y.YQL(yql, afterQuery);
+    };
+    
+    //一张包含错误信息的图片，clien爱当图片处理就当图片处理，也可以作为错误信息显示。
+    var createErrorImage = function(index, pageUrl, errorMsg) {
+        return {
+            index : index,
+            errorMsg : errorMsg,
+            pageUrl : pageUrl,
+            src : ImageLoadFailed.url,
+            width : ImageLoadFailed.width,
+            height : ImageLoadFailed.height,
+        };
     };
     
     var pickStyleAttribute = function(attrName, style) {
@@ -94,20 +108,49 @@
         if(href.match(PageUrlRex)) {
             return href;
         }
-        else if(href.match(/^\//)) {
-            return domain + href
+        var url;
+        if(href.match(/^\//)) {
+            url = domain + href
         }
         else {
-            return domain + "/" + href;
+            url = domain + "/" + href;
+        }
+        if(url.match(PageUrlRex)) {
+            return url;
+        } else {
+            return ImageLoadFailed.url;
         }
     };
     
+    var checkAndGetNextUrl = function(container) {
+        if(container.nextUrl && !container.nextUrl.match(ImageTypes)) {
+            var nextUrl = handleHref(container.nextUrl, domain);
+            if(nextUrl.match(PageUrlRex)) {
+                return nextUrl;
+            }
+        }
+        return null;
+    };
+    
+    var findImagePageNextUrl = function(obj, pageIndex) {
+        var res = obj.query.results["a"];
+        
+        if(!res || res.length <= 0) {
+            return null;
+        }
+        var container = {};
+        for(var i=0; i<res.length; ++i) {
+            filterUsefulLink(res[i], container, pageIndex);
+        }
+        return checkAndGetNextUrl(container);
+    };
+    
+    //TODO delete
     var pullAnotherImage = function(index, obj, domain, params, pageIndex) {
         
-        params.limitCount--;
         var res = obj.query.results["a"];
-        //not next found or limit out.
-        if(!res || res.length <= 0 || params.limitCount <=0) {
+        //not next found
+        if(!res || res.length <= 0) {
             hasAnotherPage = false;
             return;
         }
@@ -116,15 +159,15 @@
             filterUsefulLink(res[i], container, pageIndex);
         }
         Y.log("next page : "+container.nextUrl);
-        if(container.nextUrl && !container.nextUrl.match(ImageTypes)) {
-            var nextUrl = handleHref(container.nextUrl, domain);
+        var nextUrl = checkAndGetNextUrl(container);
+        if(nextUrl) {
             handleImagePage(index + 1, nextUrl, domain, params, true, pageIndex + 1);
         } else {
             hasAnotherPage = false;
         }
     };
     
-    var handleImages = function(index, obj, domain, params) {
+    var handleImages = function(index, obj, pageUrl, domain, params) {
         var res = obj.query.results["img"];
         if(!res || res.length <= 0) {
             return;
@@ -136,27 +179,58 @@
                continue;
             }
             paramImgs.push({
+                index : index,
+                pageUrl : pageUrl,
                 src : handleHref(imgs[i].src, domain),
                 width : imgs[i].width,
                 height : imgs[i].height
             });
         }
         if(paramImgs.length > 0) {
-            params.onLoadImage(index, paramImgs);
+            params.synchroBuffer.push(paramImgs);
         }
     };
     
+    //处理图片展示页面（并在展示页面寻找下一页）
+    var startFromImagePage = function(domain, params) {
+        
+        //图片展示页循环
+        var imagesHandler = function(index, url) {
+            var success = function(obj) {
+                handleImages(index, obj, url, domain, params);
+                var nextUrl = findImagePageNextUrl(obj, params.startPage + index);
+                if(nextUrl) {
+                    imagesHandler(index + 1, nextUrl);
+                } else {
+                    params.synchroBuffer.finish();
+                }
+            };
+            var fail = function(obj ,error) {
+                params.synchroBuffer.finish();
+            };
+            var callBackGroup = {
+                success : afterQuery,
+                fail : fail,
+            };
+            queryYQL('select * from html where url="'+url+'" and xpath="//img|//a";', callBackGroup, params);
+        };
+        imagesHandler(0, params.url);//start loop...
+    }
+    
+    //TODO delete
     var handleImagePage = function(index, url, domain, params, pullAnother, pageIndex) {
-        allImagesCount++;
+        imagesGroupNeedLoadCount++;
         var afterQuery = function(obj) {
             
             handleImages(index, obj, domain, params);
             
             if(pullAnother) {
-                pullAnotherImage(index, obj, domain, params, pageIndex);
+                params.sychroBuffer.waitUntilAdd(function(){
+                    pullAnotherImage(index, obj, domain, params, pageIndex);
+                });
             }
-            allImagesCount--;
-            if(allImagesCount<=0 && !hasAnotherPage) {
+            imagesGroupNeedLoadCount--;
+            if(imagesGroupNeedLoadCount<=0 && !hasAnotherPage) {
                 //this is the last image!
                 params.onState("finish");
             }
@@ -164,11 +238,13 @@
         var callBackGroup = {
             success : afterQuery,
             fail : function(obj, error) {
-                params.onLoadImage(index, [{
+                imagesGroupNeedLoadCount--;
+                params.synchroBuffer.push({
+                    index : index,
                     src : ImageLoadFailed.url,
                     width : ImageLoadFailed.width,
                     height : ImageLoadFailed.height,
-                }]);
+                });
             },
         };
         queryYQL('select * from html where url="'+url+'" and xpath="//img|//a";', callBackGroup, params);
@@ -212,8 +288,64 @@
     };
     
     //处理图片索引页
-    var onHandleImagesIndex = function(obj, domain, params, startIndex, pageIndex) {
-        var limitCount = params.limitCount;
+    var startFromIndexPage = function(domain, params) {
+        var imageSychroBuffer = Y.SychroBuffer.create(params.synchroBuffer.depthCount);
+        
+        //图片处理循环
+        var imageHandler = function(state, task) {
+            if(state==Y.Synchro.Finished) {
+                params.synchroBuffer.finish();
+                return;
+            }
+            var index = task.index;
+            var url = task.url;
+            
+            var success = function(obj) {
+                handleImages(index, obj, url, domain, params);
+                imageSychroBuffer.get(imageHandler);
+            };
+            var fail = function(obj, error) {
+                params.synchroBuffer.push(createErrorImage(index, url, error));
+                imageSychroBuffer.get(imageHandler);
+            };
+            var callBackGroup = {
+                success : afterQuery,
+                fail : fail,
+            };
+            queryYQL('select * from html where url="'+url+'" and xpath="//img";', callBackGroup, params);
+        };
+        imageSychroBuffer.get(imageHandler); //start loop!
+        
+        //索引页处理循环
+        var indexHandler = function(url, startIndex, pageIndex) {
+            var success = function(obj) {
+                var rs = handleImagesIndex(obj, domain, params, startIndex, pageIndex);
+                if(rs.imagePages.length > 0) {
+                    imageSychroBuffer.add(rs.imagePages);
+                }
+                if(rs.nextUrl) {
+                    indexHandler(rs.nextUrl, startIndex + rs.count, pageIndex + 1);
+                } else {
+                    imageSychroBuffer.finish();
+                }
+            };
+            var fail = function(obj, error) {
+                imageSychroBuffer.finish();
+                params.onState("error", error);
+            };
+            var callBackGroup = {
+                success : afterQuery,
+                fail : fail,
+            };
+            queryYQL('select * from html where url="'+url+'" and xpath="//a";', callBackGroup, params);
+        };
+        indexHandler(params.url, params, 0, params.startPage); // start loop!
+    };
+    
+    var handleImagesIndex = function(obj, domain, params, startIndex, pageIndex) {
+        
+        var handleResult = {imagePages : []};
+        
         var res = obj.query.results["a"];
         var container = {};
         var count = 0;
@@ -222,53 +354,35 @@
             var a = res[i];
             var url = handleHref(a.href, domain);
             if((a.img || !params.strictModel) && !url.match(ImageTypes)) {
-                 //视为可以点进去的图片
-                handleImagePage(startIndex + count, url, domain, params);
-                limitCount--;
+                //视为可以点进去的图片
+                handleResult.imagePages.push({
+                    index : startIndex + count,
+                    url : url,
+                });
                 count++;
-                if(limitCount <=0) {
-                   hasAnotherPage = false;
-                   return;
-                }
             }
             filterUsefulLink(a, container, startIndex, pageIndex);
         }
-        if(container.nextUrl && !container.nextUrl.match(ImageTypes)) {
-            var nextUrl = handleHref(container.nextUrl, domain);
-            if(limitCount > 0) {
-                handleImageIndex(nextUrl, limitCount, startIndex + count, pageIndex);
-            }
-        } else {
-            hasAnotherPage = false;
-        }
+        handleResult.count = count;
+        handleResult.nextUrl = checkAndGetNextUrl(container);
+        return handleResult;
     };
     
-    var handleImageIndex = function(url, domain, params, startIndex, pageIndex) {
-        var afterQuery = function(obj) {
-            onHandleImagesIndex(obj, domain, params, startIndex, pageIndex + 1);
-        };
-        var callBackGroup = {
-            success : afterQuery,
-            fail : function(obj, error) {
-                params.onState("error", error);
-            },
-        };
-        queryYQL('select * from html where url="'+url+'" and xpath="//a";', callBackGroup, params);
-    }
-    
-    //params: url, limitCount, onLoadImag(index, url), onState()
+    //params: url, sychroBuffer, onLoadImag(index, url), onState()
     var start = function(params) {
+        
         var domain = params.url.match(DomainHeadRex)[0];
         if(params.type == "index") {
-            handleImageIndex(params.url, domain, params, 0, params.startPage);
+            startFromIndexPage(domain, params);
         } else if(params.type == "image"){
-            handleImagePage(0, params.url, domain, params, true, params.startPage);
+            handleImagePage(0, params.url, domain, params, true, params.startPage, imageSychroBuffer);
         } else {
-            Y.log("unkown tyep : "+params.type)
+            Y.log("unkown type : "+params.type)
         }
     };
     
     Y.LoaderImages = {
         start : start
     };
-});
+    
+}, '1.0.0', { requires: [ 'sychro-buff' ] }));
