@@ -385,4 +385,4 @@
         start : start
     };
     
-}, '1.0.0', { requires: [ 'sychro-buff' ] }));
+}, '1.0.0', { requires: [ 'synchro-buffer' ] });
