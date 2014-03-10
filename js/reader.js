@@ -19,7 +19,7 @@
         }
         var widthAttr = img.width ? ("width='"+img.width+"'") : "";
         var heightAttr = img.height ? ("height='"+img.height+"'") : "";
-        var html = "<li><object data='"+img.src+"' frameBorder=0 scrolling=no "+widthAttr+" "+heightAttr+"></object></li>";
+        var html = "<li><img src='"+img.src+"' frameBorder=0 scrolling=no rel='hide_ref' "+widthAttr+" "+heightAttr+"></object></li>";
         ulList.append(html);
     };
     
