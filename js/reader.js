@@ -2,106 +2,119 @@
     
     var params;
     
-    var noImagesLoaded = true;
-    var finishLoad = false;
-    var banTouchEvent = false;
+    var finished = false;
+    var ulArray = [[]];
+    var pageIndex = -1;
+    var touchPageIndex = -1;
     
-    var imagesSrcBuff = [];
-    var cursorIndex = -1;
-    var waitForShowImagesCount = 0;
-    var loadAtLessOneImage = false;
+    var isLoadingImagesCount = 0;
     
     var controlBox = Y.one("#control-box");
-    var gallery = Y.one("#loaded-images");
-    var bottomState = Y.one("#bottom-state");
+    var gallery = Y.one("#gallery");
+    var ulList = Y.one("#loaded-images");
     
-    var touchButton = function() {
-        if(banTouchEvent){return;}
-        var oncePerLoad = params.oncePerLoad;
-        for(var i=0; i<oncePerLoad; ++i) {
-            if(!imagesSrcBuff[cursorIndex + 1]) {
-                break;
-            }
-            waitForShowImagesCount--;
-            cursorIndex++;
-            
-            var arrLi = imagesSrcBuff[cursorIndex];
-            for(var j=0; j<arrLi.length; ++j) {
-                var html = arrLi[j];
-                gallery.appendChild(html);
-            }
+    var appendImage = function(img) {
+        if(!img.height) {
+            img.height = window.screen.availHeight;
         }
-        if(finishLoad && waitForShowImagesCount <= 0) {
-            Y.detach("scroll", checkTouchButton);
-            bottomState.insert("已完成，没有更多的图片了。", "replace");
-            banTouchEvent = true;
-        }
+        var widthAttr = img.width ? ("width='"+img.width+"'") : "";
+        var heightAttr = img.height ? ("height='"+img.height+"'") : "";
+        var html = "<li><object data='"+img.src+"' frameBorder=0 scrolling=no "+widthAttr+" "+heightAttr+"></object></li>";
+        ulList.append(html);
     };
     
-    var loadNothing = function() {
-        bottomState.insert("一张图片页没有找到！", "replace");
+    var isLastPageFull = function() {
+        return ulArray[ulArray.length - 1].length >= params.countPerPage;
     };
     
-    var checkTouchButton = function() {
-        var self = this;
-        var scrollPos;
-        if(this.updateInitiated){
+    var loadImages = function(state, image) {
+        if(state != Y.SynchroBuffer.Success) {
+            finished = true;
+            refreshButtomState();
             return;
-        }   
-        //Find the pageHeight and clientHeight(the no. of pixels to scroll to make the scrollbar reach max pos)
-        var pageHeight = document.documentElement.scrollHeight;
-        var clientHeight = document.documentElement.clientHeight;
-        //Handle scroll position in case of IE differently
-        if(Y.UA.ie){
-            scrollPos = document.documentElement.scrollTop;
-        }else{
-            scrollPos = window.pageYOffset;
         }
-        if(pageHeight - (scrollPos + clientHeight) < 50) {
-            touchButton();
-        }
-    };
-    
-    var fillRandom = function(url) {
-        if(url.match(/\?/)) {
-            return url + "&_=" + Math.random();
+        if(isLastPageFull()) {
+            ulArray.push([image]);
         } else {
-            return url + "?_=" + Math.random();
-        }
-    };
-    
-    var startShowImages = function() {
-        Y.one("#control-box").hide();
-        Y.on("scroll", checkTouchButton);
-        bottomState.show();
-        touchButton();
-    };
-    
-    var tryInsertImage = function(index, arrLi) {
-        imagesSrcBuff[index] = arrLi;
-        waitForShowImagesCount++;
-        loadAtLessOneImage = true;
-    };
-    
-    var onLoadImage = function(index, imgs) {
-        var arrLi = [];
-        for(var i=0; i<imgs.length; ++i) {
-            var img = imgs[i];
-            if(!img.height) {
-                img.height = window.screen.availHeight;
+            var lastPage = ulArray[ulArray.length - 1];
+            lastPage.push(image);
+            if(pageIndex == ulArray.length - 1) {
+                appendImage(image);
             }
-            var widthAttr = img.width ? ("width='"+img.width+"'") : "";
-            var heightAttr = img.height ? ("height='"+img.height+"'") : "";
-            var html = "<li><object data='"+fillRandom(img.src)+"' frameBorder=0 scrolling=no "+widthAttr+" "+heightAttr+"></object></li>";
-            arrLi.push(html);
         }
-        tryInsertImage(index, arrLi);
-        checkTouchButton();
+        isLoadingImagesCount--;
+        refreshButtomState();
+    };
+    
+    var touchPage = function(index) {
+        if(finished || index <= touchPageIndex) {
+            return;
+        }
+        if(index == ulArray.length - 1) {
+            //最后一页剩余需要载入的图片数 + 下一页载满的图片数。
+            var num = (params.countPerPage - ulArray[index].length) + params.countPerPage;
+            //应排除正在载入，但尚未加载完毕的图片数——防止重复加载。
+            num -= isLoadingImagesCount;
+            if(num > 0) {
+                for(var i=0; i<num; ++i) {
+                    params.synchroBuffer.get(loadImages);
+                };
+                isLoadingImagesCount += num;
+            }
+        }
+    };
+    
+    var refreshButtomState = function() {
+        var bottomButton = Y.one("#bottom-state");
+        var bottomAlert = Y.one("#bottom-alert");
+        if(pageIndex >= ulArray.length - 1) {
+            bottomButton.hide();
+            bottomAlert.show();
+            if(finished) {
+                bottomAlert.set("innerHTML", "全部图片加载完毕！");
+            } else {
+                bottomAlert.set("innerHTML", "正在加载，请稍后...");
+            }
+        } else {
+            bottomButton.show();
+            bottomAlert.hide();
+        }
+    };
+    
+    var jump2Page = function(index) {
+        var topButton = Y.one("#top-state");
+        touchPage(index);
         
-        if(noImagesLoaded) {
-            noImagesLoaded = false;
-            startShowImages();
+        ulList.get('childNodes').remove();
+        if(index == 0) {
+            topButton.hide();
+        } else {
+            topButton.show();
         }
+        var uls = ulArray[index];
+        
+        for(var i=0; i<uls.length; ++i) {
+            appendImage(uls[i]);
+        }
+        refreshButtomState();
+    };
+    
+    var prePage = function() {
+        if(pageIndex==0) {
+            return;
+        }
+        pageIndex--;
+        jump2Page(pageIndex);
+        Y.one("#bottom-state").scrollIntoView();
+    }
+    
+    var nextPage = function() {
+        if(pageIndex >= ulArray.length) {
+            return;
+        }
+        pageIndex++;
+        jump2Page(pageIndex);
+        Y.one("#top-state").scrollIntoView();
     };
     
     var onState = function(state, msg) {
@@ -131,7 +144,7 @@
         params = {
             url : url,
             limitCount : 50,
-            oncePerLoad : 5, //TODO delete
+            countPerPage : 15,
             type : type,
             startPage : "guess",
             strictModel : true,
@@ -142,25 +155,16 @@
         params.onState = onState;
         
         Y.LoaderImages.start(params);
+        
+        controlBox.hide();
         gallery.show();
         
-        var testFun = function(state, img) {
-            if(state != Y.SynchroBuffer.Success) {
-                return;
-            }
-            img.width = 50;
-            img.height = 50;
-            
-            var widthAttr = img.width ? ("width='"+img.width+"'") : "";
-            var heightAttr = img.height ? ("height='"+img.height+"'") : "";
-            var html = "<li><object data='"+fillRandom(img.src)+"' frameBorder=0 scrolling=no "+widthAttr+" "+heightAttr+"></object></li>";
-            gallery.appendChild(html);
-            
-            params.synchroBuffer.get(testFun);
-        };
-        params.synchroBuffer.get(testFun);
+        nextPage();
     };
     
     Y.one("#btn-submit-index").on('click', function(){clickSumbit("index")});
     Y.one("#btn-submit-image").on('click', function(){clickSumbit("image")});
+    
+    Y.one("#top-state").on('click', prePage);
+    Y.one("#bottom-state").on('click', nextPage);
 });
