@@ -1,4 +1,4 @@
-﻿YUI().use('node', 'io', 'yql', 'loader-images', 'synchro-buffer', function(Y) {
+﻿YUI().use('node', 'io', 'yql', 'gallery-timer', 'loader-images', 'synchro-buffer', function(Y) {
     
     var params;
     
@@ -18,9 +18,9 @@
     var ajaxEnterPage = function(img, exec) {
         var hasExec = false;
         var callBack = function() {
-        if(!hasExec) {
-        exec();
-            hasExec = true;
+            if(!hasExec) {
+                exec();
+                hasExec = true;
             }
         }
         var domain = img.pageUrl.match(DomainHeadRex);
@@ -51,8 +51,16 @@
     var windowBuffer = Y.SynchroBuffer.create();
     var initWindowBuffer = function(){
         var reciver = function(state, callBack) {
+            var timer = new Y.Timer({
+                length : params.windowRefreshInterval,
+                repeatCount : 1,
+            });
             callBack();
-            windowBuffer.get(reciver);
+            timer.on('timer:stop',function(){
+                Y.log("stop");
+                windowBuffer.get(reciver);
+            });
+            timer.start();
         };
         windowBuffer.get(reciver);
     };
@@ -72,13 +80,14 @@
             }
             var widthAttr = img.width ? ("width='"+img.width+"'") : "";
             var heightAttr = img.height ? ("height='"+img.height+"'") : "";
-            var html = "<li><img src='"+img.src+"' frameBorder=0 scrolling=no rel='hide_ref' "+widthAttr+" "+heightAttr+"></object></li>";
+            var html = "<li><img src='"+img.src+"' frameBorder=0 scrolling=no rel='hide_ref' "+widthAttr+" "+heightAttr+"/></li>";
             ulList.append(html);
         };
         if(params.openPageUrl && !hasLoadedPageUrlSet[img.pageUrl]) {
             hasLoadedPageUrlSet[img.pageUrl] = true;
             refreshHideWindows(img, exec);
         } else {
+            Y.log("fuck");
             exec();
         }
     };
@@ -208,6 +217,7 @@
             type : type,
             openPageUrl : true, //打开图片前假装打开图片您所在的页面，以欺骗apache nginx 等服务器。
             openPageTimeOut : 2000, //欺骗服务器，尝试所花的时间（本来就没准备打开的，就骗你一下而已）
+            windowRefreshInterval : 1000,
             startPage : "guess",
             strictModel : true,
             minWidth : 55,
