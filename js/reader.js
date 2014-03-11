@@ -34,11 +34,12 @@
                     hasExec = true;
                 }
             }
+            var domain = img.pageUrl.match(DomainHeadRex);
+            Y.log(domain);
             Y.io(img.pageUrl, {
                 timeout : params.openPageTimeOut,
                 headers : {
-                    'Referer' : null,
-                    'X-Alt-Referer' : referrer,
+                    
                 },
                 on : {
                     start : callBack, //开始载入就调（没必要等载入那些垃圾，因为根本就不看）
