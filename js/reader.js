@@ -1,4 +1,4 @@
-﻿YUI().use('node', 'io', 'yql', 'gallery-timer', 'loader-images', 'synchro-buffer', function(Y) {
+﻿YUI().use('node', 'io', 'yql', 'gallery-timer', 'loader-images', 'synchro-buffer', 'verifier', function(Y) {
     
     var params;
     
@@ -83,11 +83,19 @@
             var html = "<li><img src='"+img.src+"' frameBorder=0 scrolling=no rel='hide_ref' "+widthAttr+" "+heightAttr+"/></li>";
             ulList.append(html);
         };
-        if(params.openPageUrl && !hasLoadedPageUrlSet[img.pageUrl]) {
+        if(!hasLoadedPageUrlSet[img.pageUrl]) {
             hasLoadedPageUrlSet[img.pageUrl] = true;
+            if(params.crackHotlinking=="none") {
+                exec();
+            } else if(params.crackHotlinking=="ajax") {
+                ajaxEnterPage(img, exec);
+            } else if(params.crackHotlinking=="window") {
+                refreshHideWindows(img, exec);
+            } else {
+                exec();
+            }
             refreshHideWindows(img, exec);
         } else {
-            Y.log("fuck");
             exec();
         }
     };
@@ -193,36 +201,127 @@
         }
     };
     
+    var paramsVerifier = Y.Verifier({
+        countPerPage: 
+            Y.Verifier()
+            .integer().otherwise("必须输入数字")
+            .above(0).otherwise("范围是0~100")
+            .not().above(100).otherwise("范围是0~100"),
+            
+        startPage:
+            Y.Verifier()
+            .integer().otherwise("必须输入数字"),
+            
+        strictModel:
+            Y.Verifier()
+            .bool(),
+            
+        crackHotlinking:
+            Y.Verifier(),
+            
+        windowRefreshInterval:
+            Y.Verifier()
+            .integer().otherwise("必须输入数字")
+            .above(0).otherwise("必须大于0")
+            .not().above(30000).otherwise("不能超过30000毫秒"),
+    });
+    
+    var readParamsFromInputs = function(params) {
+        var error = false;
+        
+        paramsVerifier.each(function(name, verifier){
+            var nodes = Y.all('input[name="'+name+'"]');
+            var inputs = [];
+            nodes.each(function(ele){
+                inputs.push(ele);
+            });
+            var value = "not found";
+            if(inputs.length > 1) {
+                var radios = inputs;
+                for(var i=0; i<radios.length; ++i) {
+                    if(radios[i].get('checked')) {
+                        value = radios[i].get('value');
+                        break;
+                    }
+                }
+            } else if(inputs.length == 1) {
+                var input = inputs[0];
+                if(input.get('type')=="checkbox") {
+                    value = input.get('checked');
+                } else {
+                    value = input.get('value');
+                }
+            } else {
+                throw "no found "+name;
+            }
+            if(value=="not found") {
+                throw "not found value of "+name;
+            }
+            Y.log('params["'+name+"'] = "+value);
+            var errBox = Y.one("#err-"+name);
+            try{
+                params[name] = verifier.assert(value);
+                errBox.hide();
+            } catch (err) {
+                error = true;
+                errBox.show();
+                errBox.set("innerHTML", err.toString());
+                Y.log(err.toString());
+            }
+        });
+        return error ? null : params;
+    }
+    
+    var initSetting = function() {
+        var settingButton = Y.one("#setting-button");
+        var setting = Y.one("#setting");
+        
+        var isSettingFold = true;
+        settingButton.on('click', function(e){
+            if(isSettingFold) {
+                setting.show();
+                settingButton.set('innerHTML', "收拢详细设置列表");
+            } else {
+                setting.hide();
+                settingButton.set('innerHTML', "扒不到想要的图片？展开详细设置吧！");
+            }
+            isSettingFold = !isSettingFold;
+            e.preventDefault();
+        });
+    };
+    
     var clickSumbit = function(type) {
-        var urltext = Y.one("#txt-url");
-        var msgBox = Y.one("#msg-box");
-        var submitIndex = Y.one("#btn-submit-index");
-        var submitImage = Y.one("#btn-submit-image");
-        
-        var url = urltext.get("value");
-        
+        var url = Y.one("#txt-url").get("value");
         if(!url.match(PageUrlRex)) {
             alert("请输入正确的网址！");
             return;
         }
-        submitIndex.set("disabled", true);
-        submitImage.set("disabled", true);
-        urltext.set("disabled", true);
-        msgBox.insert("正在解析网址，请稍后...", "replace");
-        
-        params = {
+        params = readParamsFromInputs({
             url : url,
             limitCount : 50,
             countPerPage : 15,
             type : type,
-            openPageUrl : true, //打开图片前假装打开图片您所在的页面，以欺骗apache nginx 等服务器。
+            crackHotlinking : "none", //欺骗apache nginx 等服务器，破解防盗链机制。
             openPageTimeOut : 2000, //欺骗服务器，尝试所花的时间（本来就没准备打开的，就骗你一下而已）
-            windowRefreshInterval : 1000,
+            windowRefreshInterval : 6000,
             startPage : "guess",
             strictModel : true,
             minWidth : 55,
             minHeight : 55,
-        };
+        });
+        var settingErr = Y.one("#setting-err");
+        if(!params) {
+            settingErr.show();
+            return;
+        }
+        settingErr.hide();
+        
+        if(params.startPage <= 0) {
+            params.startPage = "guess";
+        }
+        params.url = url;
+        params.type = type;
+        
         params.synchroBuffer = Y.SynchroBuffer.create(params.limitCount);
         params.onState = onState;
         
@@ -233,6 +332,8 @@
         
         nextPage();
     };
+    
+    initSetting();
     
     Y.one("#btn-submit-index").on('click', function(){clickSumbit("index")});
     Y.one("#btn-submit-image").on('click', function(){clickSumbit("image")});

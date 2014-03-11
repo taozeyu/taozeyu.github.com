@@ -82,6 +82,48 @@ YUI.add("verifier", function(Y){
         return true;
     };
     
+    var integerInterceptor = function(obj, args) {
+        if(obj==undefined) {
+            if(args[0]) {
+                return args[0];
+            } else {
+                throw "不是整数！";
+            }
+        }
+        if(obj.constructor==Number) {
+            return obj;
+        } else if (obj.constructor==String) {
+            try {
+                if(args[0] && obj.replace(/\s+/, "")=="") {
+                    return args[0];
+                }
+                return parseInt(obj);
+            } catch(err) {
+                throw "不是整数!"
+            }
+        }
+        throw "不是整数！";
+    };
+    
+    var boolInterceptor = function(obj, args) {
+        if(obj==undefined) {
+            throw "不是布尔";
+        }
+        if(typeof(obj)=="boolean") {
+            return obj;
+        }
+        else if(obj.constructor==Number) {
+            return obj!=0;
+        }
+        else if (obj.constructor==String) {
+            if(obj.test(/^\s*true$\s*/i)) {
+                return true;
+            } else if(obj.test(/^\s*false$\s*/i)) {
+                return false;
+            }
+        }
+        throw "不是布尔";
+    }
     var registerVerifer = function(store, fun, args) {
         var list = store.list;
         list = list[list.length - 1];
@@ -97,6 +139,18 @@ YUI.add("verifier", function(Y){
             args : args,
         });
         return store;
+    };
+    
+    var registerInterceptor = function(store, fun, args) {
+        if(store.list[0].length > 0) {
+            throw "interceptor muse def before any verifiers."
+        }
+        var interceptors = store.interceptors;
+        interceptors.push({
+            interceptor : fun,
+            args : args,
+        });
+        return store;
     }
     
     var registerOr = function(store) {
@@ -104,6 +158,7 @@ YUI.add("verifier", function(Y){
             throw "or() can not be after not()";
         }
         var list = store.list;
+        
         if(list[list.length - 1].length == 0) {
             throw "or() must be after some conditions.";
         } else {
@@ -119,19 +174,36 @@ YUI.add("verifier", function(Y){
         if(store.notMark) {
             throw "otherwise() can not be after not()";
         }
+        var interceptors = store.interceptors;
         var list = store.list;
         list = list[list.length - 1];
         
-        if(list.length == 0) {
+        if(list.length == 0 && interceptors.length==0) {
             throw "otherwise(), must be after some conditions.";
         }
-        list[list.length - 1].msg = msg;
+        if(store.list[0].length==0 && interceptors.length > 0) {
+            interceptors[interceptors.length - 1].msg = msg;
+        } else {
+            list[list.length - 1].msg = msg;
+        }
         return store;
     };
     
-    var veriferAssert = function(obj, list) {
+    var veriferAssert = function(obj, list, interceptors) {
+        for(var i=0; i<interceptors.length; ++i) {
+            var it = interceptors[i];
+            try{
+                obj = it.interceptor(obj, it.args);
+            } catch(err) {
+                if(it.msg) {
+                    throw msg;
+                } else {
+                    throw err;
+                }
+            }
+        }
         notpassMsgs = [];
-        for(var i=0; i<list.length; ++i) {
+        for(i=0; i<list.length; ++i) {
             var rs = true;
             loop:for(var j=0; j<list[i].length; ++j) {
                 var node = list[i][j];
@@ -144,7 +216,7 @@ YUI.add("verifier", function(Y){
                 }
             }
             if(rs) {
-                return;//pass!!
+                return obj;//pass!!
             }
         }
         if(notpassMsgs.length==0) {
@@ -170,22 +242,28 @@ YUI.add("verifier", function(Y){
                 conditions.assert(params[c]);
             }
         }
+        rsFun.each = function(fun) {
+            for(var name in conditions) {
+                fun(name, conditions[name]);
+            }
+        };
         return rsFun;
     }
     
     var buildVerifierCondition = function() {
         var veriferFunction = function(obj) {
             try{
-                veriferAssert(obj, veriferFunction.list);
+                veriferAssert(obj, veriferFunction.list, veriferFunction.interceptors);
             } catch (err) {
                 return false;
             }
             return true;
         };
         veriferFunction.assert = function(obj) {
-            return veriferAssert(obj, veriferFunction.list);
+            return veriferAssert(obj, veriferFunction.list, veriferFunction.interceptors);
         }
         veriferFunction.list = [[]];
+        veriferFunction.interceptors = [];
         veriferFunction.notMark = false;
         
         veriferFunction.above = function() {
@@ -205,6 +283,13 @@ YUI.add("verifier", function(Y){
         };
         veriferFunction.blank = function() {
             return registerVerifer(veriferFunction, blankVerifer, arguments);
+        };
+        //----//
+        veriferFunction.integer = function() {
+            return registerInterceptor(veriferFunction, integerInterceptor, arguments);
+        };
+        veriferFunction.bool = function() {
+            return registerInterceptor(veriferFunction, boolInterceptor, arguments);
         };
         //----//
         veriferFunction.or = function() {

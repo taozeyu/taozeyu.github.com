@@ -34,10 +34,60 @@
   	  <input id="btn-submit-index" type="submit" value="相册页" />
   	  <input id="btn-submit-image" type="submit" value="图片页" />
 	</div>
-    <div id="msg-box">
-	  有任何建议，请联系我：<a href="mailto:purplehalo@126.com">purplehalo@126.com</a>
+	<div class="attr-err" id="setting-err" style="display:none">你的设置有错误，打开详细设置菜单查看吧。</div>
+	<a id="setting-button" href="#">扒不到想要的图片？展开详细设置吧！</a>
+	<div id="setting" style="display:none">
+		<div class="attr-box">
+			<label>每页显示</label><input type="text" class="attr-short" name="countPerPage" value="15"/><label>张图片</label>
+			<div class="attr-err" id="err-countPerPage" style="display:none"></div>
+			<div class="attr-msg">范围 1~100</div>
+		</div>
+		<div class="attr-box">
+			<label>当前页数</label><input type="text" class="attr-short" name="startPage" value="0"/>
+			<div class="attr-err" id="err-startPage" style="display:none"></div>
+			<div class="attr-msg">
+				输入网址对应相册的哪一页，准确输入可以提高命中率。<br/>
+				如果不输入（保留0），系统会根据网页的情况自动分析当前的页数，但是这种分析可能很不准。<br/>
+				（目前支持中文、英文、日文，其他语言肯定是测不准的）
+			</div>
+		</div>
+		<div class="attr-box">
+			<label>开启严格模式</label><input type="checkbox" class="attr-short" name="strictModel" checked />
+			<div class="attr-err" id="err-strictModel" style="display:none"></div>
+			<div class="attr-msg">
+				开启严格模式后，在搜索相册时，仅仅进入可以由图片点进去的项。关闭严格模式后，则进入每一个可进入的链接。<br/>
+				严格模式下，搜到与目标无关的图片会少一些，但是有可能什么也搜不到。
+			</div>
+		</div>
+		<div class="attr-box">
+			<label>破解反盗链模式</label><br/>
+			<input type="radio" class="attr-short" name="crackHotlinking" value="none"/><label>无</label><br/>
+			<div class="attr-msg">出图速度最快，但可能无法观看图片。</div>
+			<input type="radio" class="attr-short" name="crackHotlinking" value="ajax" /><label>伪装访问</label><br/>
+			<div class="attr-msg">出图速度稍稍降低，但具有一定破解反盗链的能力。</div>
+			<input type="radio" class="attr-short" name="crackHotlinking" value="window" checked/><label>弹窗访问</label><br/>
+			<div class="attr-msg">
+				出图速度最慢，且会弹出一个窗口，但具有最强的破解反盗链能力。<br/>
+				在该模式下，会弹出一个小窗口。如果该窗口无法弹出，该模式也将不其作用。<br/>
+				因此，如果你的浏览器有阻止弹窗功能，请暂时关闭该功能。
+			</div>
+			<div class="attr-err" id="err-crackHotlinking" style="display:none"></div>
+			<label>弹窗访问模式下每隔多少</label><input class="attr-short" type="text" name="windowRefreshInterval" value="2500" /><label><b>毫秒</b>刷出一张图片</label>
+			<div class="attr-err" id="err-windowRefreshInterval" style="display:none"></div>
+			<div class="attr-msg">
+				时间越长，破解反盗链的几率越高，但这也意味着你需要等待更久。请根据自己的网速以及目标网站自行调整。
+			</div>
+		</div>
+		<div class="attr-box">
+			<label>过滤这个尺寸以下的图片：宽</label>
+			<input class="attr-short" type="text" name="minWidth" value="55"/>
+			<label> x 高</label>
+			<input class="attr-short" type="text" name="minHeight" value="55"/>
+			<div class="attr-err" id="err-minWidth" style="display:none"></div>
+			<div class="attr-err" id="err-minHeight" style="display:none"></div>
+			<div class="attr-msg">这个尺寸以下的图片，将会被抛弃。</div>
+		</div>
 	</div>
-    </div>
   </div>
   <div id="gallery" style="display:none">
   	<div id="top-state">上一页</div>
@@ -46,6 +96,11 @@
     <div id="bottom-state">下一页</div>
   </div>
   <div id="hide-windows">
+  </div>
+  
+  <div id="msg-box">
+	<p>有任何建议，请联系我：<a href="mailto:purplehalo@126.com">purplehalo@126.com</a></p>
+    <p>有人发邮件给我，问为什么字那么大？因为我觉得用ipad操作的话，太小不好点，手指可是很粗的。</p>
   </div>
   </body>
 </html>

@@ -13,11 +13,13 @@
 }
 #control-box input {
 	font-size: 17px;
-	width: 30px;
 	height: 50px;
 }
-#control-box input[type="text"] {
+#txt-url {
 	width: 800px;
+}
+#control-box input[type="text"] {
+	
 }
 #control-box input[type="submit"] {
 	width: 200px;
@@ -28,6 +30,7 @@
 }
 #button-box {
 	padding-top: 30px;
+	padding-bottom: 30px;
 }
 #top-state, #bottom-state {
 	padding-top: 15px;
@@ -61,10 +64,56 @@
 	font-size: 18px;
 	color: #333333;
 	text-align: center;
-	padding-top: 15px;
+	padding-top: 175px;
+	padding-bottom: 75px;
 }
 #bottom-alert {
 	font-size: 27px;
 	color: #000000;
 	text-align: center;
+}
+#setting {
+	text-align: center;
+	width: 100%;
+}
+
+.attr-box {
+	text-align: left;
+	border: 2px dashed #357DD1;
+	margin-top: 35px;
+	padding: 21px;
+	color: #000000;
+	margin-right: 35px;
+}
+.attr-box label {
+	font-size: 31px;
+	padding-left: 11px;
+	padding-right: 11px;
+}
+
+.attr-box input[type="text"] {
+	height: 25px;
+	text-align: center;
+}
+.attr-short {
+	width: 55px;
+	font-size: 21px;
+}
+.attr-err {
+	color: #FF0000;
+	font-weight: bolder;
+	font-size: 25px;
+	background-color: #FF9900;
+	padding-top: 5px;
+	padding-right: 35px;
+	padding-bottom: 5px;
+	padding-left: 35px;
+}
+.attr-msg {
+	padding-top: 11px;
+	padding-bottom: 5px;
+}
+#setting-button {
+	font-size: 25px;
+	font-weight: bold;
 }
