@@ -80,7 +80,7 @@
             }
             var widthAttr = img.width ? ("width='"+img.width+"'") : "";
             var heightAttr = img.height ? ("height='"+img.height+"'") : "";
-            var html = "<li><img src='"+img.src+"' frameBorder=0 scrolling=no rel='hide_ref' "+widthAttr+" "+heightAttr+"/></li>";
+            var html = "<li><object data='"+img.src+"' frameBorder=0 scrolling=no rel='hide_ref' "+widthAttr+" "+heightAttr+"></object></li>";
             ulList.append(html);
         };
         if(!hasLoadedPageUrlSet[img.pageUrl]) {
@@ -94,7 +94,6 @@
             } else {
                 exec();
             }
-            refreshHideWindows(img, exec);
         } else {
             exec();
         }
