@@ -80,7 +80,7 @@
             }
             var widthAttr = img.width ? ("width='"+img.width+"'") : "";
             var heightAttr = img.height ? ("height='"+img.height+"'") : "";
-            var html = "<li><object data='"+img.src+"' frameBorder=0 scrolling=no rel='noreferrer' "+widthAttr+" "+heightAttr+"></object></li>";
+            var html = "<li><img src='"+img.src+"' frameBorder=0 scrolling=no rel='noreferrer' "+widthAttr+" "+heightAttr+"></img></li>";
             ulList.append(html);
         };
         var imageState = hasLoadedPageUrlSet[img.pageUrl];
