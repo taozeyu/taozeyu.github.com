@@ -15,6 +15,46 @@
     
     var hasLoadedPageUrlSet = {};
     
+    var ajaxEnterPage = function(img, exec) {
+        var hasExec = false;
+        var callBack = function() {
+        if(!hasExec) {
+        exec();
+            hasExec = true;
+            }
+        }
+        var domain = img.pageUrl.match(DomainHeadRex);
+        if(domain) {
+            domain = domain[0];
+        }
+        Y.log(domain);
+        Y.io(img.pageUrl, {
+            timeout : params.openPageTimeOut,
+            headers : {
+                "Content-Type" : "application/x-www-form-urlencoded",
+            },
+            beforeSend : function(xhr){
+                return;
+                xhr.setRequestHeader("X-Requested-With", {
+                    toString: function() {
+                        return domain;
+                    }
+                });
+            },
+            on : {
+                start : callBack, //开始载入就调（没必要等载入那些垃圾，因为根本就不看）
+                complete : callBack, //保险起见，一定要调用，因为也许图片能显示呢？
+            },
+        });
+    }
+    
+    var refreshHideWindows = function(img, exec) {
+        var dialog = window.open(img.pageUrl,"hidewindow.shenqi.info",
+            'toolbar=no,status=no,menubar=no,scrollbars=no,resizable=no,left=10000, top=10000, width=10, height=10, visible=none');
+        window.focus();
+        exec();
+    }
+    
     var appendImage = function(img) {
         var exec = function() {
             if(!img.height) {
@@ -27,25 +67,7 @@
         };
         if(params.openPageUrl && !hasLoadedPageUrlSet[img.pageUrl]) {
             hasLoadedPageUrlSet[img.pageUrl] = true;
-            var hasExec = false;
-            var callBack = function() {
-                if(!hasExec) {
-                    exec();
-                    hasExec = true;
-                }
-            }
-            var domain = img.pageUrl.match(DomainHeadRex);
-            Y.log(domain);
-            Y.io(img.pageUrl, {
-                timeout : params.openPageTimeOut,
-                headers : {
-                    
-                },
-                on : {
-                    start : callBack, //开始载入就调（没必要等载入那些垃圾，因为根本就不看）
-                    complete : callBack, //保险起见，一定要调用，因为也许图片能显示呢？
-                },
-            });
+            refreshHideWindows(img, exec);
         } else {
             exec();
         }
