@@ -1,4 +1,4 @@
-﻿YUI().use('node', 'yql', 'loader-images', 'synchro-buffer', function(Y) {
+﻿YUI().use('node', 'io', 'yql', 'loader-images', 'synchro-buffer', function(Y) {
     
     var params;
     
@@ -13,14 +13,37 @@
     var gallery = Y.one("#gallery");
     var ulList = Y.one("#loaded-images");
     
+    var hasLoadedPageUrlSet = {};
+    
     var appendImage = function(img) {
-        if(!img.height) {
-            img.height = window.screen.availHeight;
+        var exec = function() {
+            if(!img.height) {
+                img.height = window.screen.availHeight;
+            }
+            var widthAttr = img.width ? ("width='"+img.width+"'") : "";
+            var heightAttr = img.height ? ("height='"+img.height+"'") : "";
+            var html = "<li><img src='"+img.src+"' frameBorder=0 scrolling=no rel='hide_ref' "+widthAttr+" "+heightAttr+"></object></li>";
+            ulList.append(html);
+        };
+        if(params.openPageUrl && !hasLoadedPageUrlSet[img.pageUrl]) {
+            hasLoadedPageUrlSet[img.pageUrl] = true;
+            var hasExec = false;
+            var callBack = function() {
+                if(!hasExec) {
+                    exec();
+                    hasExec = true;
+                }
+            }
+            Y.io(img.pageUrl, {
+                timeout : params.openPageTimeOut,
+                on : {
+                    start : callBack, //开始载入就调（没必要等载入那些垃圾，因为根本就不看）
+                    complete : callBack, //保险起见，一定要调用，因为也许图片能显示呢？
+                },
+            });
+        } else {
+            exec();
         }
-        var widthAttr = img.width ? ("width='"+img.width+"'") : "";
-        var heightAttr = img.height ? ("height='"+img.height+"'") : "";
-        var html = "<li><img src='"+img.src+"' frameBorder=0 scrolling=no rel='hide_ref' "+widthAttr+" "+heightAttr+"></object></li>";
-        ulList.append(html);
     };
     
     var isLastPageFull = function() {
@@ -146,6 +169,8 @@
             limitCount : 50,
             countPerPage : 15,
             type : type,
+            openPageUrl : true, //打开图片前假装打开图片您所在的页面，以欺骗apache nginx 等服务器。
+            openPageTimeOut : 2000, //欺骗服务器，尝试所花的时间（本来就没准备打开的，就骗你一下而已）
             startPage : "guess",
             strictModel : true,
             minWidth : 55,
