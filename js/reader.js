@@ -36,6 +36,10 @@
             }
             Y.io(img.pageUrl, {
                 timeout : params.openPageTimeOut,
+                headers : {
+                    'Referer' : null,
+                    'X-Alt-Referer' : referrer,
+                },
                 on : {
                     start : callBack, //开始载入就调（没必要等载入那些垃圾，因为根本就不看）
                     complete : callBack, //保险起见，一定要调用，因为也许图片能显示呢？
