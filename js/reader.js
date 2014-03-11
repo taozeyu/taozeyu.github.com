@@ -222,7 +222,7 @@
             Y.Verifier()
             .integer().otherwise("必须输入数字")
             .above(0).otherwise("必须大于0")
-            .not().above(30000).otherwise("不能超过30000毫秒"),
+            .not().above(3000000).otherwise("不能超过3000000毫秒"),
     });
     
     var readParamsFromInputs = function(params) {
