@@ -48,11 +48,21 @@
         });
     }
     
+    var windowBuffer = Y.SynchroBuffer.create();
+    var initWindowBuffer = function(){
+        var reciver = function(state, callBack) {
+            callBack();
+            windowBuffer.get(reciver);
+        };
+        windowBuffer.get(reciver);
+    };
+    initWindowBuffer();
+    
     var refreshHideWindows = function(img, exec) {
         var dialog = window.open(img.pageUrl,"hidewindow.shenqi.info",
             'toolbar=no,status=no,menubar=no,scrollbars=no,resizable=no,left=10000, top=10000, width=10, height=10, visible=none');
         window.focus();
-        exec();
+        windowBuffer.add(exec);
     }
     
     var appendImage = function(img) {
