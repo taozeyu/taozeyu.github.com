@@ -1,5 +1,7 @@
 ﻿YUI.add("loader-images", function(Y){
     
+    var imageUrlsHasLoaded = {};
+    
     var checkPairs = function(rex, url) {
         var ms = url.match(rex);
         if(ms) {
@@ -192,6 +194,15 @@
                continue;
             }
             var imgSrc = handleHref(imgs[i].src, domain);
+            if(imageUrlsHasLoaded[imgSrc]) {
+                if(imageUrlsHasLoaded[imgSrc] >= params.imageUrlLimit) {
+                    Y.log("filter url : "+imgSrc);
+                    continue;
+                }
+                imageUrlsHasLoaded[imgSrc]++;
+            } else {
+                imageUrlsHasLoaded[imgSrc] = 1;
+            }
             paramImgs.push({
                 index : index,
                 pageUrl : pageUrl,
