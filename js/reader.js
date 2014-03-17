@@ -80,7 +80,13 @@
             }
             var widthAttr = img.width ? ("width='"+img.width+"'") : "";
             var heightAttr = img.height ? ("height='"+img.height+"'") : "";
-            var html = "<li><img src='"+img.src+"' frameBorder=0 scrolling=no rel='noreferrer' "+widthAttr+" "+heightAttr+"></img></li>";
+            var html;
+            if(params.redirectImage) {
+                var redirectUrl = "http://115.29.175.42/util/redirect?url="+encodeURIComponent(img.src);
+                html = "<li><object data='"+redirectUrl+"' frameBorder=0 scrolling=no rel='noreferrer' "+widthAttr+" "+heightAttr+"></object></li>";
+            } else {
+                html = "<li><img src='"+img.src+"' frameBorder=0 scrolling=no rel='noreferrer' "+widthAttr+" "+heightAttr+"></img></li>";
+            }
             ulList.append(html);
         };
         var imageState = hasLoadedPageUrlSet[img.pageUrl];
@@ -310,6 +316,7 @@
             imageUrlLimit : 2, //如果一张图片的url连续出现 imageUrlLimit 次，就过滤掉。
             crackHotlinking : "none", //欺骗apache nginx 等服务器，破解防盗链机制。
             openPageTimeOut : 2000, //欺骗服务器，尝试所花的时间（本来就没准备打开的，就骗你一下而已）
+            redirectImage : true, //重定向图片，以消除referrer
             windowRefreshInterval : 6000,
             startPage : "guess",
             strictModel : true,
